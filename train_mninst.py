@@ -19,13 +19,13 @@ class DigitClassifier(nn.Module):
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         # Max pooling layer
         self.pool = nn.MaxPool2d(2, 2)
-        # Fully connected layers
+        # Fully connected layers # Analogy: "Spread all 64 expert reports on one giant conference table in a single line."
         self.fc1 = nn.Linear(64 * 7 * 7, 128)  # 7x7 because of two pooling layers on 28x28 image
         self.fc2 = nn.Linear(128, 10)  # 10 output classes (digits 0-9)
         # Dropout for regularization
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.5) # Analogy: During training, randomly send half home, so detectives (neuorons) don't depend on each other, become self reliant
         # Activation function
-        self.relu = nn.ReLU()
+        self.relu = nn.ReLU() # Analogy: Quality control approves confident conclusions (only positive scores, remove 0 and negative)
 
     def forward(self, x):
         # Conv layer 1 + activation + pooling
@@ -49,6 +49,9 @@ def load_data():
     ])
 
     # Download and load training data
+    # # Analogy: "Prepare the case files consistently:"
+        # Convert all photos to the same format (ToTensor)
+        # Adjust lighting to standard conditions (Normalize) so detectives can compare cases fairly
     train_dataset = datasets.MNIST(root='test_images/data', train=True, download=True, transform=transform)
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
@@ -59,13 +62,16 @@ def load_data():
     return train_loader, test_loader
 
 # Training function
-def train(model, device, train_loader, optimizer, criterion, epoch): # Analogy: "It's training day! Everyone report to the academy. Dropout is active - random people will be sent home during exercises."
+# Analogy Training Academy
+    # Analogy: "It's training day! Everyone report to the academy. Dropout is active - random people will be sent home during exercises."
+def train(model, device, train_loader, optimizer, criterion, epoch):
     model.train()
     total_loss = 0
     correct = 0
     total = 0
 
-    for batch_idx, (data, target) in enumerate(train_loader): # Analogy: "Here comes a batch of 64 practice cases with answer sheets."
+    # Analogy: "Here comes a batch of 64 practice cases with answer sheets."
+    for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device) # device => CPU or GPU
 
         # Zero the gradients
@@ -76,10 +82,17 @@ def train(model, device, train_loader, optimizer, criterion, epoch): # Analogy: 
         loss = criterion(output, target) # Analogy: "Compare your verdicts to the answer sheet. How wrong were you? That's your 'loss score'."
 
         # Backward pass and optimize
+        # Analogy: "INVESTIGATION TIME! The chief traces back through the entire agency:"
+            # "Verdict specialists, your weights were off by this much..."
+            # "Analysts, you need to adjust these connections..."
+            # "Senior detectives, pay more attention to this feature..."
+            # "Junior detectives, your filters need tweaking here..."
+            # This is backpropagation - figuring out exactly who needs to improve and by how much.
         loss.backward()
-        optimizer.step()
+        optimizer.step() # Analogy: "Everyone make those adjustments NOW!"
 
         # Track statistics
+        # Analogy: "Count how many cases we got right in this batch."
         total_loss += loss.item()
         pred = output.argmax(dim=1, keepdim=True)
         correct += pred.eq(target.view_as(pred)).sum().item()
@@ -95,19 +108,23 @@ def train(model, device, train_loader, optimizer, criterion, epoch): # Analogy: 
     return avg_loss, accuracy
 
 # Testing function
+# Analogy: Final Exam (test function)
 def test(model, device, test_loader, criterion):
     model.eval()
     test_loss = 0
     correct = 0
 
+    # Analogy: "This is just an exam - don't learn from it! No adjustments, no backpropagation, just see how you perform."
     with torch.no_grad():
         for data, target in test_loader:
+            # Analogy: "Process all 10,000 secret cases and compare to answers. What's the final score?"
             data, target = data.to(device), target.to(device)
             output = model(data)
             test_loss += criterion(output, target).item()
             pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
 
+    # Analogy: "Results are in! You got x out of 10,000 correct. That's xx.xx% accuracy!"
     test_loss /= len(test_loader)
     accuracy = 100. * correct / len(test_loader.dataset)
 
@@ -117,11 +134,13 @@ def test(model, device, test_loader, criterion):
     return test_loss, accuracy
 
 # Visualize some predictions
+# Analogy: "Let's see some example cases the agency solved."
 def visualize_predictions(model, device, test_loader, num_images=6):
     model.eval()
     images, labels = next(iter(test_loader))
     images, labels = images[:num_images].to(device), labels[:num_images]
 
+    # Analogy: "Run 6 cases through without learning, just to see the verdicts."
     with torch.no_grad():
         outputs = model(images)
         predictions = outputs.argmax(dim=1)
@@ -129,6 +148,10 @@ def visualize_predictions(model, device, test_loader, num_images=6):
     fig, axes = plt.subplots(2, 3, figsize=(12, 8))
     axes = axes.ravel()
 
+    #Analogy: "Create a bulletin board showing:"
+        # The photo evidence
+        # The correct answer
+        # What your agency guessed
     for idx in range(num_images):
         img = images[idx].cpu().squeeze()
         axes[idx].imshow(img, cmap='gray')
@@ -140,20 +163,27 @@ def visualize_predictions(model, device, test_loader, num_images=6):
     print("Saved predictions visualization to predictions.png")
 
 # Main training loop
+# Analogy: The Grand Opening
 def main():
     # Load data
+    # Analogy: "Gather all the case files from the archives."
     print("Loading MNIST dataset...")
     train_loader, test_loader = load_data()
 
     # Initialize model
+    # Analogy: "Build the entire detective agency according to our blueprint and move everyone into the crime lab (GPU/CPU)."
     model = DigitClassifier().to(device)
     print(f"\nModel architecture:\n{model}")
 
     # Loss function and optimizer
+    # Analogy: "Define how we measure mistakes. CrossEntropyLoss is like a strict grading rubric that penalizes confident wrong answers heavily."
     criterion = nn.CrossEntropyLoss()
+    # Analogy: "Hire Adam, the training coordinator, who decides how much each person adjusts after mistakes."
+        # lr=0.001 (learning rate) = "Make small, careful adjustments. Don't overcorrect!"
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     # Training parameters
+    # Analogy: "We'll run 5 complete training sessions. Each session, everyone sees all 60,000 training cases."
     num_epochs = 5
 
     # Lists to store metrics
@@ -162,6 +192,12 @@ def main():
     test_losses = []
     test_accuracies = []
 
+    # Analogy: "Each day follows the same pattern:"
+        # Day 1:
+            # Morning: Train on 60,000 cases (with mistakes and corrections)
+            # Afternoon: Take final exam on 10,000 secret cases
+            # Record: Training accuracy 94%, Test accuracy 92%
+        # Day 2, repeat, Day 3-5, Keep improving!
     print("\nStarting training...")
     for epoch in range(1, num_epochs + 1):
         train_loss, train_acc = train(model, device, train_loader, optimizer, criterion, epoch)
@@ -181,6 +217,9 @@ def main():
 
     # Plot training history
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+    # Analogy: "Create performance charts:"
+        # Graph 1: Loss over time (Should go DOWN - fewer mistakes each day)
+        # Graph 2: Accuracy over time (Should go UP - more correct answers each day)
 
     ax1.plot(range(1, num_epochs + 1), train_losses, label='Train Loss')
     ax1.plot(range(1, num_epochs + 1), test_losses, label='Test Loss')
@@ -200,7 +239,20 @@ def main():
     plt.savefig('training_history.png')
     print("Saved training history to training_history.png")
 
+    # Analogy: "GRAND OPENING ANNOUNCEMENT: Our agency achieves 98.5% accuracy! Open for business!"
     print(f"\nFinal Test Accuracy: {test_accuracies[-1]:.2f}%")
 
 if __name__ == '__main__':
     main()
+
+
+# The Complete Story Arc:
+
+# Planning phase: Design the agency structure
+# Hiring phase: Set up all departments and specialists
+# Preparation phase: Gather and organize 70,000 case files
+# Training phase: 5 days of intensive practice with corrections
+# Testing phase: Regular exams to measure real performance
+# Graduation: Save the trained agency
+# Showcase: Display examples and performance graphs
+# Open for business: Ready to classify real handwritten digits!
