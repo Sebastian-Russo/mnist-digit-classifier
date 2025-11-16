@@ -39,6 +39,17 @@ Test on your own image:
 python test_model.py path/to/your/digit.png
 ```
 
+Run Prediction on your own image:
+```bash
+python predict.py
+# Then enter: test_images/my_digit_7.png
+```
+Then run Visualizations:
+```bash
+python visualize.py
+```
+
+
 The image should:
 - Be a handwritten digit (0-9)
 - Have dark digit on light background (or it will invert automatically)
