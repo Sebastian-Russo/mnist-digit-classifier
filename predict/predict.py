@@ -164,7 +164,7 @@ if __name__ == '__main__':
 
     # MODE 1: Process a single case
     # print("📋 MODE: Single Case Processing")
-    # predict_and_visualize('test_images/my_digit_7.png')
+    # predict_and_visualize('test_images/digit_7.png')
 
     # MODE 2: Process all cases in a folder
     # print("📋 MODE: Batch Case Processing")

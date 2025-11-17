@@ -38,7 +38,7 @@ class DigitClassifier(nn.Module):
 # ANALOGY: Open the agency and examine their trained expertise
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = DigitClassifier().to(device)
-model.load_state_dict(torch.load('mnist_model.pth'))
+model.load_state_dict(torch.load('../train/mnist_model.pth'))
 model.eval()
 print("🏢 Detective agency loaded - ready for behind-the-scenes tour!\n")
 
@@ -159,7 +159,7 @@ def visualize_feature_maps(image_idx=0):
         transforms.Normalize((0.1307,), (0.3081,))
     ])
 
-    test_dataset = datasets.MNIST(root='./data', train=False,
+    test_dataset = datasets.MNIST(root='../.data', train=False,
                                   download=True, transform=transform)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=True)
 

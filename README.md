@@ -19,7 +19,7 @@ pip install torch torchvision matplotlib numpy pillow
 
 Run the training script:
 ```bash
-python train_mnist.py
+python3 train/train_mnist.py
 ```
 
 This will:
@@ -36,17 +36,17 @@ Expected accuracy: ~98-99%
 
 Test on your own image:
 ```bash
-python test_model.py path/to/your/digit.png
+python3 train/test_model.py path/to/your/digit.png
 ```
 
 Run Prediction on your own image:
 ```bash
-python predict.py
+python3 predict/predict.py
 # Then enter: test_images/my_digit_7.png
 ```
 Then run Visualizations:
 ```bash
-python visualize.py
+python3 predict/visualize.py
 ```
 
 
