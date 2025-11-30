@@ -5,6 +5,8 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning)
 
 """
 DETECTIVE AGENCY ANALOGY:
@@ -38,7 +40,7 @@ class DigitClassifier(nn.Module):
 # ANALOGY: Open the agency and examine their trained expertise
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = DigitClassifier().to(device)
-model.load_state_dict(torch.load('../train/mnist_model.pth'))
+model.load_state_dict(torch.load('mnist_model.pth'))
 model.eval()
 print("🏢 Detective agency loaded - ready for behind-the-scenes tour!\n")
 
@@ -47,7 +49,7 @@ def visualize_conv1_filters():
     ANALOGY: Look at each junior detective's magnifying glass!
 
     After training, each of the 32 junior detectives has specialized their
-    3×3 magnifying glass to look for specific patterns:
+    3x3 magnifying glass to look for specific patterns:
     - Some look for vertical edges
     - Some look for horizontal edges
     - Some look for curves
@@ -88,7 +90,7 @@ def visualize_conv1_filters():
         else:
             ax.axis('off')
 
-    plt.suptitle('👮 32 Junior Detectives: What Each One Learned to Detect',
+    plt.suptitle('32 Junior Detectives: What Each One Learned to Detect',
                  fontsize=14, fontweight='bold')
     plt.tight_layout()
     plt.savefig('visualizations/learned_filters_conv1.png', dpi=150, bbox_inches='tight')
@@ -106,7 +108,7 @@ def visualize_conv2_filters():
     - "Two circles stacked" (probably an 8)
     - "Diagonal with horizontal top" (likely a 7)
     """
-    print("🔍 TOUR STOP 2: Senior Detectives' Department")
+    print("TOUR STOP 2: Senior Detectives' Department")
     print("Senior detectives combine junior findings to spot complex patterns...\n")
 
     # ANALOGY: Each senior detective reviews all 32 junior reports
@@ -131,13 +133,13 @@ def visualize_conv2_filters():
             ax.set_title(f'Senior {i+1}\nAnalysis', fontsize=8)
             ax.axis('off')
 
-    plt.suptitle('👔 Senior Detectives: How They Analyze Junior Reports\n'
+    plt.suptitle('Senior Detectives: How They Analyze Junior Reports\n'
                  '(Showing how each senior processes one junior\'s findings)',
                  fontsize=14, fontweight='bold')
     plt.tight_layout()
     plt.savefig('visualizations/learned_filters_conv2.png', dpi=150, bbox_inches='tight')
     plt.show()
-    print("✅ Saved senior detectives' analysis patterns: visualizations/learned_filters_conv2.png\n")
+    print("Saved senior detectives' analysis patterns: visualizations/learned_filters_conv2.png\n")
 
 def visualize_feature_maps(image_idx=0):
     """
@@ -170,8 +172,8 @@ def visualize_feature_maps(image_idx=0):
 
     image = image.to(device)
 
-    print(f"📁 Selected Case: Digit {label.item()}")
-    print(f"🎬 Processing begins...\n")
+    print(f"Selected Case: Digit {label.item()}")
+    print(f"Processing begins...\n")
 
     # ANALOGY: Set up security cameras at each department
     activations = {}
@@ -191,10 +193,10 @@ def visualize_feature_maps(image_idx=0):
         output = model(image)
         prediction = output.argmax(dim=1).item()
 
-    print(f"✅ Case processed!")
-    print(f"   True Label: {label.item()}")
-    print(f"   Agency Verdict: {prediction}")
-    print(f"   {'✓ CORRECT!' if label.item() == prediction else '✗ INCORRECT'}\n")
+    print(f"Case processed!")
+    print(f"True Label: {label.item()}")
+    print(f"Agency Verdict: {prediction}")
+    print(f"{'✓ CORRECT!' if label.item() == prediction else '✗ INCORRECT'}\n")
 
     # ANALOGY: Review the security footage from each department
     fig = plt.figure(figsize=(16, 14))
@@ -223,7 +225,7 @@ def visualize_feature_maps(image_idx=0):
         grid_img[row*28:(row+1)*28, col*28:(col+1)*28] = conv1_act[i].numpy()
 
     plt.imshow(grid_img, cmap='viridis')
-    plt.title('👮 JUNIOR DETECTIVES\' FINDINGS (showing 16 of 32 detectives)\n'
+    plt.title('JUNIOR DETECTIVES\' FINDINGS (showing 16 of 32 detectives)\n'
               'Each panel shows what ONE junior detective highlighted\n'
               'Bright areas = "I found something important here!"',
               fontsize=12, pad=15)
@@ -238,7 +240,7 @@ def visualize_feature_maps(image_idx=0):
                 bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
 
     # ===== SENIOR DETECTIVES' PERSPECTIVE =====
-    print("📹 Reviewing Senior Detectives' Reports...")
+    print("Reviewing Senior Detectives' Reports...")
     conv2_act = activations['conv2'].cpu().squeeze()
     plt.subplot(3, 1, 3)
 
@@ -252,7 +254,7 @@ def visualize_feature_maps(image_idx=0):
         grid_img[row*14:(row+1)*14, col*14:(col+1)*14] = conv2_act[i].numpy()
 
     plt.imshow(grid_img, cmap='plasma')
-    plt.title('👔 SENIOR DETECTIVES\' ANALYSIS (showing 16 of 64 detectives)\n'
+    plt.title('SENIOR DETECTIVES\' ANALYSIS (showing 16 of 64 detectives)\n'
               'Each panel shows ONE senior\'s combined analysis\n'
               'Bright areas = "This complex pattern is key to identification!"',
               fontsize=12, pad=15)
@@ -271,9 +273,9 @@ def visualize_feature_maps(image_idx=0):
     plt.savefig(output_path, dpi=150, bbox_inches='tight')
     plt.show()
 
-    print(f"✅ Saved case processing footage: {output_path}\n")
+    print(f" Saved case processing footage: {output_path}\n")
     print("=" * 70)
-    print("💡 INSIGHTS:")
+    print("  INSIGHTS:")
     print("   - Each detective sees the SAME image differently")
     print("   - Juniors detect simple features (edges, curves)")
     print("   - Seniors detect complex patterns (digit shapes)")

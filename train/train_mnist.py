@@ -45,7 +45,7 @@ class DigitClassifier(nn.Module):
 def load_data():
     # Transform: convert to tensor and normalize
     transform = transforms.Compose([
-        transforms.ToTensor(), # Conver data to same format (ToTensor)
+        transforms.ToTensor(), # Convert data to same format (ToTensor)
         transforms.Normalize((0.1307,), (0.3081,))  # MNIST mean and std
     ])
 
