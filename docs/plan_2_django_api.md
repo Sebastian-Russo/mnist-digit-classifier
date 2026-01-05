@@ -8,13 +8,15 @@ views.py                    The chefs (handle orders, make food)
 manage.py                   The manager (runs everything)
 
 
-File                        Purpose                             Restaurant Analogy
+**File**                    **Purpose**                         **Restaurant Analogy**
 model_loader.py             Business logic (your model)         The kitchen & chef
 views.py                    Handle requests, return responses   The waiter
 urls.py                     Map URLs to views                   The menu
+
 models.py                   Database schemas                    (Empty - you don't store data)
 admin.py                    Admin interface                     (Empty - no admin needed)
 tests.py                    Unit tests                          (Empty - no tests yet)
+
 
 # Django API Build Plan
 

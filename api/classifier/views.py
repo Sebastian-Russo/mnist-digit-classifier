@@ -33,3 +33,22 @@ def predict_digit(request):
         'prediction': prediction,
         'confidence': round(confidence * 100, 2)
     })
+
+###############################################
+# Historical naming from MVC pattern:
+# MVC = Model-View-Controller (traditional web framework pattern)
+# MVC TermDjango TermWhat It DoesModelmodels.pyData/databaseViewtemplates/ (HTML)What user seesControllerviews.pyBusiness logic
+
+# Why It's Confusing
+# Django switched terminology:
+
+# "View" in Django = Controller logic (handles requests)
+# "Template" in Django = What other frameworks call "View"
+
+# So views.py is not what the user sees - it's the logic that decides what to show.
+
+# Better Name Would Be
+# controllers.py or handlers.py - but Django chose views.py and everyone stuck with it.
+# Restaurant analogy: Should be called waiters.py but historically named views.py.
+
+# TL;DR: Historical naming quirk. Just remember: views.py = request handlers.
