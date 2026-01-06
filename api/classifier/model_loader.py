@@ -26,7 +26,7 @@ class DigitClassifier(nn.Module):
         super(DigitClassifier, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)  # 32 junior detectives
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # 64 senior detectives
-        self.pool = nn.MaxPool2d(2, 2)  # Assistant
+        self.pool = nn.MaxPool2d(2, 2)  # Assistant - Junior detectives write detailed reports → Assistant keeps only the strongest findings from each section
         self.fc1 = nn.Linear(64 * 7 * 7, 128)  # 128 analysts
         self.fc2 = nn.Linear(128, 10)  # 10 verdict specialists
         self.dropout = nn.Dropout(0.5)
