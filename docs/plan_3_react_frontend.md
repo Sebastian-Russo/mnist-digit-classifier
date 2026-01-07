@@ -31,7 +31,9 @@ cd frontend
 
 ### 2. Install Dependencies
 ```bash
-npm install react-canvas-draw
+npm install react-canvas-draw // version conflict
+
+npm install react-sketch-canvas
 ```
 
 ### 3. Update CORS in Django
