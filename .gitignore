@@ -44,4 +44,10 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Lambda
+lambda_layer/
+lambda_function/function.zip
+*.zip
+
 EOF
