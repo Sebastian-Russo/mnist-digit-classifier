@@ -420,108 +420,20 @@ Use a SageMaker Notebook to deploy your model in Script Mode. This is the simple
 5. Wait for status: **InService**
 6. Click **Open Jupyter** next to your notebook instance
 
-### 2.1.1: Fix IAM Role Permissions (Critical)
+### 2.1.1: Best Practice IAM Setup
 
-**Problem:** SageMaker Python SDK's `get_execution_role()` needs `iam:GetRole` permission on itself, which is missing by default.
+**For development/experimentation in notebook instances, use AWS managed policy:**
 
-**Fix:**
 1. Go to **IAM** → **Roles** → `SageMaker-mnist-model-ai-training-sebastian`
-2. **Add permissions** → **Create inline policy**
-3. **JSON tab**, paste:
-   ```json
-   {
-       "Version": "2012-10-17",
-       "Statement": [
-           {
-               "Effect": "Allow",
-               "Action": [
-                   "iam:GetRole"
-               ],
-               "Resource": "arn:aws:iam::308665918648:role/service-role/SageMaker-mnist-model-ai-training-sebastian"
-           },
-           {
-               "Effect": "Allow",
-               "Action": [
-                   "s3:ListBucket",
-                   "s3:GetObject",
-                   "s3:PutObject",
-                   "s3:DeleteObject",
-                   "s3:GetBucketLocation"
-               ],
-               "Resource": [
-                   "arn:aws:s3:::sagemaker-us-east-1-308665918648",
-                   "arn:aws:s3:::sagemaker-us-east-1-308665918648/*"
-               ]
-           },
-           {
-               "Effect": "Allow",
-               "Action": [
-                   "s3:ListBucket"
-               ],
-               "Resource": [
-                   "arn:aws:s3:::mnist-model-ai-training-sebastian"
-               ]
-           },
-           {
-               "Effect": "Allow",
-               "Action": [
-                   "s3:GetObject",
-                   "s3:PutObject"
-               ],
-               "Resource": [
-                   "arn:aws:s3:::mnist-model-ai-training-sebastian/*"
-               ]
-           },
-           {
-               "Effect": "Allow",
-               "Action": [
-                   "sagemaker:BatchPutMetrics",
-                   "ecr:GetAuthorizationToken",
-                   "ecr:ListImages"
-               ],
-               "Resource": "*"
-           },
-           {
-               "Effect": "Allow",
-               "Action": [
-                   "ecr:BatchCheckLayerAvailability",
-                   "ecr:GetDownloadUrlForLayer",
-                   "ecr:BatchGetImage"
-               ],
-               "Resource": [
-                   "arn:aws:ecr:us-east-1:763104351884:repository/pytorch-inference"
-               ]
-           },
-           {
-               "Effect": "Allow",
-               "Action": "cloudwatch:PutMetricData",
-               "Resource": "*",
-               "Condition": {
-                   "StringLike": {
-                       "cloudwatch:namespace": [
-                           "*SageMaker*",
-                           "*Sagemaker*",
-                           "*sagemaker*"
-                       ]
-                   }
-               }
-           },
-           {
-               "Effect": "Allow",
-               "Action": [
-                   "logs:CreateLogStream",
-                   "logs:PutLogEvents",
-                   "logs:CreateLogGroup",
-                   "logs:DescribeLogStreams"
-               ],
-               "Resource": "arn:aws:logs:*:*:log-group:/aws/sagemaker/*"
-           }
-       ]
-   }
-   ```
-4. **Name**: `SageMakerCompletePermissions`
-5. **Create policy**
-6. **Stop and restart** the notebook instance (required for new permissions)
+2. **Add permissions** → **Attach policies**
+3. Search for and attach **AmazonSageMakerFullAccess**
+4. **Stop and restart** the notebook instance (required for new permissions to take effect)
+
+**Why this is better:**
+- Includes all SageMaker actions (CreateModel, CreateEndpoint, etc.)
+- Includes necessary S3/ECR/CloudWatch/Logs permissions
+- Includes `iam:GetRole` permission (fixes the get_role error)
+- No custom policy maintenance needed
 
 ### 2.2: Upload and Deploy Model in Notebook
 
