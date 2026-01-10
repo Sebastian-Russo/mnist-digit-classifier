@@ -648,6 +648,30 @@ SyntaxError: unterminated string literal (detected at line 6)
 ```
 When trying to use a long base64 string in the notebook test cell.
 
+### Why We're Testing Incrementally
+
+**Current Approach (Cell-by-Cell):**
+1. Encounter error → Write fix in notebook
+2. Apply fix to inference.py
+3. Re-package and re-deploy
+4. Test again
+5. Repeat for each new error
+
+**Why This Approach:**
+- **Troubleshooting**: Each error revealed a new issue we couldn't predict
+- **Validation**: Needed to test each fix individually to confirm it worked
+- **Learning**: Discovered problems (padding, truncation) through actual failures
+
+**Better Production Approach:**
+Once all issues are known, update inference.py once with all fixes:
+- Base64 padding auto-fix
+- Truncated image handling
+- Error logging
+- Input validation
+Then deploy once.
+
+**Current Status:** We're in discovery mode - finding and fixing each issue as it appears. For production, we'd consolidate all fixes into a single robust inference.py deployment.
+
 ---
 
 ## Step 4: Update React Frontend
