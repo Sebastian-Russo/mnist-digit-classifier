@@ -550,6 +550,106 @@ This ensures the base64 string is always valid before sending to the endpoint.
 
 ---
 
+## Common Issue: PIL Truncated Image Error
+
+### Problem
+After fixing base64 padding, you may get:
+```
+OSError: Truncated File Read
+```
+in `predict_fn` at line: `img = Image.open(data).convert('L')`
+
+### Why This Happens
+- The base64 string is decoded successfully but the resulting bytes form an incomplete/truncated PNG
+- PIL/Pillow detects the PNG file is incomplete during parsing
+- Common causes:
+  - Base64 string was truncated before encoding
+  - Image data was cut off during copy-paste
+  - Network/JSON encoding dropped bytes
+
+### Fix 1: Allow Truncated Images (Quick Fix)
+Add to `inference.py` after imports:
+```python
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+```
+
+### Fix 2: Add Debug Logging
+Add to `inference.py` after imports:
+```python
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+```
+
+Update `input_fn` after decode:
+```python
+image_data = base64.b64decode(data['image'])
+logger.debug(f"Decoded bytes length: {len(image_data)}")
+logger.debug(f"First 8 bytes: {image_data[:8].hex()}")  # expect 89504e470d0a1a0a
+```
+
+Update `predict_fn` around Image.open:
+```python
+try:
+    img = Image.open(data).convert('L')
+    logger.info(f"Image opened: mode={img.mode}, size={img.size}")
+except Exception as e:
+    logger.exception("Image open failed")
+    raise
+```
+
+### Re-deploy Steps
+```python
+# Re-package with updated inference.py
+!tar -czf model.tar.gz mnist_model.pth inference.py
+
+# Upload and update endpoint
+!aws s3 cp model.tar.gz s3://sagemaker-us-east-1-308665918648/model.tar.gz
+
+# Update endpoint with update_endpoint=True
+predictor = model.deploy(
+    initial_instance_count=1,
+    instance_type='ml.t2.medium',
+    endpoint_name='mnist-classifier-endpoint',
+    update_endpoint=True
+)
+```
+
+### Check CloudWatch Logs
+After testing, check CloudWatch logs for debug output:
+- Valid PNG: first 8 bytes = `89504e470d0a1a0a`
+- MNIST PNG length: ~1-5 KB
+- If length < 100 bytes or signature wrong → base64 is truncated
+
+---
+## Checkpoint
+## Current Status: Testing Model Endpoint
+
+**Last Updated:** 2026-01-10 2:03 PM
+
+**Issue:** Attempting to test the deployed SageMaker endpoint with a base64-encoded image but encountering string formatting issues in the notebook.
+
+**Where We Left Off:**
+1. Successfully deployed the PyTorch model to SageMaker endpoint `mnist-classifier-endpoint`
+2. Fixed base64 padding issue in previous test
+3. Now encountering `SyntaxError: unterminated string literal` when trying to use a verified MNIST test image
+4. The base64 string is too long and getting split across lines in the notebook
+
+**Next Steps:**
+- [ ] Use a shorter test approach or load from file
+- [ ] Successfully invoke the endpoint and get a prediction
+- [ ] Verify the model is working correctly
+- [ ] Document the final working test code
+
+**Current Error:**
+```python
+SyntaxError: unterminated string literal (detected at line 6)
+```
+When trying to use a long base64 string in the notebook test cell.
+
+---
+
 ## Step 4: Update React Frontend
 
 ### 4.1: Direct SageMaker endpoint (for testing)
