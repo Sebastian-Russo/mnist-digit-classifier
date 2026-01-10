@@ -504,6 +504,52 @@ cat output.json
 
 ---
 
+## Common Issue: Base64 Padding Error
+
+### Problem
+When testing the endpoint, you may get:
+```
+ModelError: Received server error (500) from primary with message "Incorrect padding"
+```
+
+### Why This Happens
+- Base64 strings must have a length that's a multiple of 4
+- When copied/pasted, the padding characters (`=`) at the end may be lost
+- SageMaker's `base64.b64decode()` is strict about padding
+
+### Fix in Notebook
+```python
+import json
+import boto3
+import base64
+
+# Read your test file
+with open('test_payload.json', 'r') as f:
+    test_payload = json.load(f)
+
+# Fix padding
+base64_str = test_payload['image']
+padding = len(base64_str) % 4
+if padding:
+    base64_str += '=' * (4 - padding)
+    test_payload['image'] = base64_str
+
+# Test
+runtime = boto3.client('sagemaker-runtime')
+response = runtime.invoke_endpoint(
+    EndpointName='mnist-classifier-endpoint',
+    ContentType='application/json',
+    Body=json.dumps(test_payload)
+)
+
+result = json.loads(response['Body'].read())
+print(f"Prediction: {result}")
+```
+
+This ensures the base64 string is always valid before sending to the endpoint.
+
+---
+
 ## Step 4: Update React Frontend
 
 ### 4.1: Direct SageMaker endpoint (for testing)
