@@ -623,54 +623,42 @@ After testing, check CloudWatch logs for debug output:
 - If length < 100 bytes or signature wrong → base64 is truncated
 
 ---
+
 ## Checkpoint
-## Current Status: Testing Model Endpoint
 
-**Last Updated:** 2026-01-10 2:03 PM
+### Status: Endpoint Testing Complete ✅
 
-**Issue:** Attempting to test the deployed SageMaker endpoint with a base64-encoded image but encountering string formatting issues in the notebook.
+**Date:** 2026-01-12 9:30 PM
 
-**Where We Left Off:**
-1. Successfully deployed the PyTorch model to SageMaker endpoint `mnist-classifier-endpoint`
-2. Fixed base64 padding issue in previous test
-3. Now encountering `SyntaxError: unterminated string literal` when trying to use a verified MNIST test image
-4. The base64 string is too long and getting split across lines in the notebook
+**What We Accomplished:**
+1. ✅ Successfully deployed MNIST model to SageMaker endpoint
+2. ✅ Fixed preprocessing location issue (moved from `predict_fn` to `input_fn`)
+3. ✅ Resolved BytesIO handling problems
+4. ✅ Created working test payload with valid base64 image
+5. ✅ Endpoint successfully returned prediction: `{'prediction': 0, 'confidence': 99.39}`
+6. ✅ Deleted endpoint to stop charges
+
+**Current Endpoint Status:**
+- **Name:** `mnist-endpoint-sebastian-v4` (deleted after testing)
+- **Status:** Deleted (no charges)
+- **Last Test Result:** `{'prediction': 0, 'confidence': 99.39}` ✅
+
+**Key Fixes Applied:**
+- Moved ALL preprocessing to `input_fn`
+- `input_fn` now returns preprocessed tensor
+- `predict_fn` just runs model inference
+- Fixed test data with valid base64 PNG
 
 **Next Steps:**
-- [ ] Use a shorter test approach or load from file
-- [ ] Successfully invoke the endpoint and get a prediction
-- [ ] Verify the model is working correctly
-- [ ] Document the final working test code
+- [x] Delete endpoint when not using to stop charges
+- [ ] Recreate endpoint for React frontend
+- [ ] Connect React frontend to endpoint
+- [ ] Add API Gateway for public access
+- [ ] Deploy frontend to S3/CloudFront
 
-**Current Error:**
-```python
-SyntaxError: unterminated string literal (detected at line 6)
-```
-When trying to use a long base64 string in the notebook test cell.
-
-### Why We're Testing Incrementally
-
-**Current Approach (Cell-by-Cell):**
-1. Encounter error → Write fix in notebook
-2. Apply fix to inference.py
-3. Re-package and re-deploy
-4. Test again
-5. Repeat for each new error
-
-**Why This Approach:**
-- **Troubleshooting**: Each error revealed a new issue we couldn't predict
-- **Validation**: Needed to test each fix individually to confirm it worked
-- **Learning**: Discovered problems (padding, truncation) through actual failures
-
-**Better Production Approach:**
-Once all issues are known, update inference.py once with all fixes:
-- Base64 padding auto-fix
-- Truncated image handling
-- Error logging
-- Input validation
-Then deploy once.
-
-**Current Status:** We're in discovery mode - finding and fixing each issue as it appears. For production, we'd consolidate all fixes into a single robust inference.py deployment.
+**Reference Documents:**
+- `SAGEMAKER_DEBUGGING_SUMMARY.md` - Complete debugging journey
+- `sagemaker_deployment/notebook_cells.md` - Working notebook cells
 
 ---
 
