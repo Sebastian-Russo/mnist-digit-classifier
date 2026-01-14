@@ -11,20 +11,20 @@ function App() {
   const handlePredict = async () => {
     setLoading(true);
 
-    // Export canvas as image
+    // Export canvas as base64
     const imageData = await canvasRef.current.exportImage('png');
 
-    // Convert base64 to blob
-    const blob = await fetch(imageData).then(r => r.blob());
-
-    // Send to Django API
-    const formData = new FormData();
-    formData.append('image', blob, 'digit.png');
+    // Remove the data URL prefix (data:image/png;base64,)
+    const base64Image = imageData.split(',')[1];
 
     try {
-      const response = await fetch('http://localhost:8000/predict/', {
+      // Will point to API Gateway once we set it up
+      const response = await fetch('YOUR_API_GATEWAY_URL_HERE/predict', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: base64Image }),
       });
 
       const data = await response.json();
