@@ -11,15 +11,11 @@ function App() {
   const handlePredict = async () => {
     setLoading(true);
 
-    // Export canvas as base64
     const imageData = await canvasRef.current.exportImage('png');
-
-    // Remove the data URL prefix (data:image/png;base64,)
     const base64Image = imageData.split(',')[1];
 
     try {
-      // Will point to API Gateway once we set it up
-      const response = await fetch('YOUR_API_GATEWAY_URL_HERE/predict', {
+      const response = await fetch('https://nwc8c4muag.execute-api.us-east-1.amazonaws.com/prod/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,8 +24,11 @@ function App() {
       });
 
       const data = await response.json();
-      setPrediction(data.prediction);
-      setConfidence(data.confidence);
+
+      // Parse nested response
+      const result = JSON.parse(data.body);
+      setPrediction(result.prediction);
+      setConfidence(result.confidence);
     } catch (error) {
       console.error('Error:', error);
       alert('Failed to get prediction');
@@ -37,7 +36,6 @@ function App() {
 
     setLoading(false);
   };
-
   const handleClear = () => {
     canvasRef.current.clearCanvas();
     setPrediction(null);
