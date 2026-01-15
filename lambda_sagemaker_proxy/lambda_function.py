@@ -1,5 +1,9 @@
 import boto3
 import json
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 sagemaker_runtime = boto3.client('sagemaker-runtime', region_name='us-east-1')
 
@@ -7,9 +11,17 @@ def lambda_handler(event, context):
     """
     Proxy Lambda: Browser → API Gateway → Lambda → SageMaker
     """
+    logger.info(f"Received event: {json.dumps(event)}")
+
     try:
-        # Parse request body
-        body = json.loads(event.get('body', '{}'))
+        # FIX: API Gateway sends data directly, not wrapped in 'body'
+        # Check if event has 'body' key (HTTP API format) or is direct JSON (REST API with mapping template)
+        if 'body' in event:
+            body = json.loads(event['body'])
+        else:
+            body = event
+
+        logger.info(f"Parsed body: {body}")
 
         if 'image' not in body:
             return {
@@ -41,6 +53,7 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
+        logger.error(f"Error: {str(e)}")
         return {
             'statusCode': 500,
             'headers': {
